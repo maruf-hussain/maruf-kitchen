@@ -8,7 +8,8 @@ import img5 from '../../../assets/home/05.png'
 import img6 from '../../../assets/home/06.png'
 const Banner = () => {
     return (
-        <Carousel className="text-center" >
+       
+  <Carousel  className="text-center h-[800px]">
         <div >
             <img src={img2}/>
            
@@ -35,6 +36,8 @@ const Banner = () => {
         </div>
        
     </Carousel>
+
+      
     );
 };
 
