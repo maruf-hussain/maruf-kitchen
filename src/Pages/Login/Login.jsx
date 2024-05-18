@@ -1,12 +1,47 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import img from '../../assets/others/authentication2.png'
+import { loadCaptchaEnginge, LoadCanvasTemplate, LoadCanvasTemplateNoReload, validateCaptcha } from 'react-simple-captcha';
+import { useContext, useEffect,  useState } from "react";
+import { AuthContext } from "../../providers/AuthProvider";
+import Swal from "sweetalert2";
+
 const Login = () => {
+    const [disable, setDisable] = useState(true)
+const {signIn} = useContext(AuthContext);
+const navigate = useNavigate()
+const location = useLocation();
+const from = location.state?.from?.pathname || "/";
+
+
+    useEffect(() => {
+        loadCaptchaEnginge(6);
+    }, [])
     const handleLogin = (event) => {
         event.preventDefault();
         const form = event.target;
         const email = form.email.value;
         const password = form.password.value;
-        console.log(email, password)
+        signIn(email,password)
+        .then(resutl => {
+            const user = resutl.user;
+            console.log(user)
+            Swal.fire({
+                position: "top-end",
+                icon: "success",
+                title: "Login Succesfully",
+                showConfirmButton: false,
+                timer: 1500
+              });
+              navigate(from, { replace: true });
+
+        })
+    }
+    const handleCaptcha = (e) => {
+        const user_captcha_value = e.target.value;
+        if (validateCaptcha(user_captcha_value)) {
+            setDisable(false)
+        }
+        
     }
     return (
         <div className="hero min-h-screen bg-base-200">
@@ -28,13 +63,21 @@ const Login = () => {
                                 <span className="label-text">Password</span>
                             </label>
                             <input type="password" placeholder="password" name='password' className="input input-bordered" required />
+                            <label className="label ">
+                                <a href="#" className="label-text-alt  text-red-500 link link-hover">Forgotten password?</a>
+                            </label>
+                        </div>
+                        <div className="form-control">
+                            <label className="label">
+                                <LoadCanvasTemplate />
+                            </label>
+                            <input onBlur={handleCaptcha} type="text"  placeholder="CAPTCHA" name='captcha' className="input input-bordered" required />
+                           
 
                         </div>
-                        <label className="label ">
-                            <a href="#" className="label-text-alt  text-red-500 link link-hover">Forgotten password?</a>
-                        </label>
+
                         <div className="form-control mt-6">
-                            <input className="btn bg-yellow-400 text-white" type="submit" value="Sign in" />
+                            <input disabled={disable} className="btn bg-yellow-400 text-white" type="submit" value="Sign in" />
                         </div>
                         <p className='text-center my-2'>New to Car Service! <Link className='text-yellow-400 font-bold' to='/signup'>Sign Up</Link></p>
 
