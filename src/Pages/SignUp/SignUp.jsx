@@ -4,29 +4,42 @@ import { useContext } from 'react';
 import { AuthContext } from '../../providers/AuthProvider';
 import { useForm } from 'react-hook-form';
 import Swal from 'sweetalert2';
+import useAxiosPublic from '../../hooks/useAxiosPublic/useAxiosPublic';
 
 
 const SignUp = () => {
     const { register, handleSubmit, reset, formState: { errors }, } = useForm();
     const { createUser, updateUserProfile } = useContext(AuthContext);
     const navigate = useNavigate();
+
     const onSubmit = data => {
+        const axiosPublic = useAxiosPublic();
         createUser(data.email, data.password)
             .then(result => {
                 const loggedUser = result.loggedUser;
                 console.log(loggedUser);
                 updateUserProfile(data.name, data.photoURL)
                     .then(() => {
-                        console.log('User Profile Info Update')
-                        reset();
-                        Swal.fire({
-                            position: "top-end",
-                            icon: "success",
-                            title: "User Created Succesfully",
-                            showConfirmButton: false,
-                            timer: 1500
-                        });
-                        navigate('/')
+                        const userInfo = {
+                            name: data.name,
+                            email: data.email
+                        }
+                        axiosPublic.post('/users', userInfo)
+                        .then(res =>{
+                            if(res.data.insertedId){
+                                console.log('user data add')
+                                reset();
+                                Swal.fire({
+                                    position: "top-end",
+                                    icon: "success",
+                                    title: "User Created Succesfully",
+                                    showConfirmButton: false,
+                                    timer: 1500
+                                });
+                                navigate('/')
+                            }
+                        })
+                       
                     })
                     .catch((error) => console.log(error)
                     );
